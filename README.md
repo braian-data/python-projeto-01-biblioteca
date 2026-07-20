@@ -1,5 +1,5 @@
 # python-projeto-01-biblioteca
-Projeto de estudo para praticar Python, POO, organização de código e boas práticas.
+Projeto desenvolvido para estudo de Python e Programação Orientada a Objetos. O foco é praticar fundamentos e acompanhar minha evolução como desenvolvedor.
 
 ## Criação do Ambiente Virtual
 python -m venv .venv
