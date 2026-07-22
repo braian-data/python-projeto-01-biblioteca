@@ -1,3 +1,4 @@
+from utils.validacoes import validar_email, estruturar_data
 
 class Usuario:
     def __init__(
@@ -8,9 +9,10 @@ class Usuario:
         email: str,
         telefone: str,
     ) -> None:
+        validar_email(email)
         self._nome = nome
-        self._data_nascimento = data_nascimento
-        self._data_cadastro = data_cadastro
+        self._data_nascimento = estruturar_data(data_nascimento)
+        self._data_cadastro = estruturar_data(data_cadastro)
         self._email = email
         self._telefone = telefone
         self._lista: list = []
