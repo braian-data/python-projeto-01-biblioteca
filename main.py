@@ -1,22 +1,26 @@
+from datetime import date
 import sys
-from models.usuario import Aluno, Professor
+
 from models.livro import Livro
+from models.usuario import Aluno, Professor
 from services.biblioteca_service import BibliotecaService
-from utils.validacoes import auditar_isbn, estruturar_data, validar_email
+from utils.validacoes import auditar_isbn
+
 
 def exibir_menu() -> str:
-    """Renderiza a interface do terminal e aguarda o I/O do usuário."""
-    print("\n" + "="*30)
+    """Renderiza a interface do terminal e devolve a opção escolhida."""
+    print("\n" + "=" * 30)
     print("SISTEMA DE BIBLIOTECA (CLI)")
-    print("="*30)
+    print("=" * 30)
     print("1. Cadastrar Livro")
     print("2. Cadastrar Usuário (Aluno)")
     print("3. Processar Empréstimo")
     print("4. Listar Títulos do Acervo (Map)")
     print("5. Listar Livros Indisponíveis (List Comprehension)")
     print("0. Encerrar Sistema")
-    print("="*30)
+    print("=" * 30)
     return input("Selecione a rotina: ").strip()
+
 
 def main() -> None:
     # Inicialização do Service (Banco de Dados em Memória)
@@ -40,10 +44,12 @@ def main() -> None:
                 editora = input("Editora: ").strip()
                 categoria = input("Categoria: ").strip()
 
-                # A auditoria do ISBN ocorre no momento da inserção (ou na própria classe Livro)
-                isbn_validado = auditar_isbn(isbn_raw) 
-                
-                novo_livro = Livro(titulo, autor, isbn_validado, ano, editora, categoria)
+                # Apenas a auditoria do ISBN ocorre antes de instanciar o Livro
+                isbn_validado = auditar_isbn(isbn_raw)
+
+                novo_livro = Livro(
+                    titulo, autor, isbn_validado, ano, editora, categoria
+                )
                 biblioteca.adicionar_livro(novo_livro)
                 print("[SUCCESS] Livro indexado com sucesso.")
             except ValueError as e:
@@ -58,11 +64,19 @@ def main() -> None:
                 telefone = input("Telefone: ").strip()
                 matricula = input("Matrícula: ").strip()
 
-                validar_email(email)
-                data_nasc_formatada = estruturar_data(data_nasc)
-                data_cadastro_atual = "22/07/2026" # Hardcoded no momento, ideal utilizar módulo datetime
+                # Obtém a data atual em formato de string dinamicamente
+                data_cadastro_atual = date.today().strftime("%d/%m/%Y")
 
-                novo_aluno = Aluno(nome, data_nasc_formatada, data_cadastro_atual, email, telefone, matricula)
+                # Passamos as strings puras: o __init__ de Aluno/Usuario
+                # executará a validação de e-mail e a estruturação de data!
+                novo_aluno = Aluno(
+                    nome=nome,
+                    data_nascimento=data_nasc,
+                    data_cadastro=data_cadastro_atual,
+                    email=email,
+                    telefone=telefone,
+                    matricula=matricula,
+                )
                 biblioteca.registrar_usuario(novo_aluno)
                 print("[SUCCESS] Usuário injetado no sistema.")
             except (ValueError, TypeError) as e:
@@ -72,16 +86,17 @@ def main() -> None:
             print("\n--- PROCESSAMENTO DE EMPRÉSTIMO ---")
             email_usuario = input("E-mail do Usuário cadastrado: ").strip()
             isbn_alvo = input("ISBN do Livro: ").strip()
-            
+
             try:
-                # 1. Recuperar usuário pelo e-mail (Exige que você implemente 'buscar_usuario_por_email' no Service)
-                # Simulação da busca (Adicione esse método no seu biblioteca_service.py)
-                usuario = next((u for u in biblioteca._usuarios if u._email == email_usuario), None)
-                if not usuario:
-                    raise KeyError(f"Usuário com e-mail {email_usuario} não localizado.")
-                
-                # 2. Executar transação
-                emprestimo = biblioteca.processar_emprestimo(usuario, auditar_isbn(isbn_alvo), "22/07/2026")
+                # 1. Busca através da interface do Service (sem violar atributo privado)
+                usuario = biblioteca.buscar_usuario_por_email(email_usuario)
+
+                data_hoje = date.today().strftime("%d/%m/%Y")
+
+                # 2. Executa a transação no Service
+                emprestimo = biblioteca.processar_emprestimo(
+                    usuario, auditar_isbn(isbn_alvo), data_hoje
+                )
                 print(f"[SUCCESS] {emprestimo}")
             except (KeyError, PermissionError, ValueError) as e:
                 print(f"[FALHA NA TRANSAÇÃO] {e}")
@@ -105,7 +120,10 @@ def main() -> None:
                     print(f" -> {livro}")
 
         else:
-            print("[ERRO] Instrução não reconhecida. Utilize os índices do menu.")
+            print(
+                "[ERRO] Instrução não reconhecida. Utilize os índices do menu."
+            )
+
 
 if __name__ == "__main__":
     main()

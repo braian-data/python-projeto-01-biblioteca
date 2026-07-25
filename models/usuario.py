@@ -1,6 +1,10 @@
-from utils.validacoes import validar_email, estruturar_data
+from abc import ABC, abstractmethod
+from utils.validacoes import estruturar_data, validar_email
 
-class Usuario:
+
+# 1. Herda de ABC para se tornar formalmente uma Classe Abstrata
+class Usuario(ABC):
+
     def __init__(
         self,
         nome: str,
@@ -16,6 +20,14 @@ class Usuario:
         self._email = email
         self._telefone = telefone
         self._lista: list = []
+
+    @property
+    def nome(self) -> str:
+        return self._nome
+
+    @property
+    def email(self) -> str:
+        return self._email
 
     def __eq__(self, other: object) -> bool:
         """Define a igualdade baseada na unicidade do e-mail."""
@@ -34,17 +46,18 @@ class Usuario:
         """Representação formal para log e debug."""
         return f"{self.__class__.__name__}(nome='{self._nome}', email='{self._email}')"
 
+    # 2. Decorador que transforma o método em um contrato obrigatório
+    @abstractmethod
     def permissao_emprestimo(self) -> bool:
+        """Contrato abstrato: obriga todas as subclasses a implementarem
+
+        sua própria regra de negócio.
         """
-        Simulação de abstração.
-        Força as subclasses a implementarem sua própria regra de negócio.
-        """
-        raise NotImplementedError(
-            f"A subclasse {self.__class__.__name__} deve implementar o método permissao_emprestimo()."
-        )
+        pass
 
 
 class Aluno(Usuario):
+
     def __init__(
         self,
         nome: str,
@@ -68,6 +81,7 @@ class Aluno(Usuario):
 
 
 class Professor(Usuario):
+
     def __init__(
         self,
         nome: str,
@@ -78,7 +92,7 @@ class Professor(Usuario):
         cod_docente: str,
     ) -> None:
         super().__init__(nome, data_nascimento, data_cadastro, email, telefone)
-        self._cod_docente = cod_docente 
+        self._cod_docente = cod_docente
 
     def permissao_emprestimo(self) -> bool:
         """Professor possui permissão irrestrita na lógica atual."""
@@ -89,6 +103,7 @@ class Professor(Usuario):
 
 
 class Bibliotecario(Usuario):
+
     def __init__(
         self,
         nome: str,
@@ -96,7 +111,7 @@ class Bibliotecario(Usuario):
         data_cadastro: str,
         email: str,
         telefone: str,
-        crb: str, #sigla para Conselho Regional de Biblioteconomia
+        crb: str,  # Sigla para Conselho Regional de Biblioteconomia
     ) -> None:
         super().__init__(nome, data_nascimento, data_cadastro, email, telefone)
         self._crb = crb
