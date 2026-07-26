@@ -1,37 +1,35 @@
-# python-projeto-01-biblioteca
-Projeto de estudo para praticar Python, POO, organização de código e boas práticas.
+# Sistema de Gestão de Biblioteca (Pure Python CLI)
 
-## Criação do Ambiente Virtual
-python -m venv .venv
-(Convenção de mercado: usar .venv com ponto inicial para mantê-lo oculto em sistemas Unix).
+> **Nota do Autor:** Este projeto foi construído do zero utilizando **apenas Python nativo** com o objetivo de dominar os fundamentos de Engenharia de Software, Clean Architecture e Orientação a Objetos antes de recorrer a frameworks web (como Django/FastAPI) ou ORMs.
 
-## Ativação da Instância Isolada
+---
 
-Garantir que qualquer pip install que você execute instale os pacotes dentro do diretório local do projeto, e não no ambiente global do seu sistema operacional.
+## Por que Python Puro?
 
-Windows (PowerShell):
-    .\.venv\Scripts\Activate.ps1
-Windows (CMD):
-    .\.venv\Scripts\activate.bat
-Linux/macOS (Bash/Zsh):
-    source .venv/bin/activate
+Em vez de apenas copiar sintaxe de bibliotecas prontas, decidi focar na base:
+* **Entender a memória RAM:** Garantir que um objeto só exista se for 100% válido (Atomicidade).
+* **Desacoplamento de verdade:** Separar quem valida, quem guarda regras de negócio e quem lida com o usuário.
+* **Resiliência:** Tratar erros na borda do sistema (*Fail-Fast*) sem deixar a aplicação crashar.
 
-# Instalação e Troca de Dependências
-Instalar pacotes mapeados:
-    pip install -r requirements.txt
-Registrar novas bibliotecas instaladas no projeto:
-    pip freeze > requirements.txt
+---
 
-## Gestão do Projeto
+## Arquitetura e Estrutura
 
-O desenvolvimento deste repositório é gerenciado via **ClickUp**, utilizando metodologias ágeis (Scrum/Kanban) para acompanhamento das tasks e do fluxo de Pull Requests.
+├── models/             # Entidades (Livro, Usuário, Empréstimo)
+├── services/           # Regras de negócio e acervo em memória (O(1))
+├── utils/              # Validações sintáticas puras (Regex, Datetime, ISBN)
+└── main.py             # Interface no terminal e captura de erros
 
-## Nomenclatura e Tipagem da Branch
+### Padrões Aplicados
+* **Validação Atômica:** Objetos só nascem se os dados passarem na auditoria.
+* **Polimorfismo (ABC):** Uso de classe abstrata `Usuario` com regras específicas para `Aluno`, `Professor` e `Bibliotecario`.
+* **Transação Defensiva:** A classe `Emprestimo` valida permissões e disponibilidade no ato da criação.
 
-O prefixo muda:
-    chore/ (tarefas de manutenção/setup)
-    feat/ (novas funcionalidades de negócio).
+---
 
-## Contexto do Desenvolvimento
+## Como Executar
 
-Este repositório é operado sob um modelo de simulação de fluxo de trabalho assíncrono e colaborativo. O ciclo de vida de desenvolvimento de software — abrangendo o provisionamento de tarefas, revisão de código (Code Review) e integração de Pull Requests — é executado simulando ambientes e permissões distintas. O objetivo é garantir o rigor e a aplicação estrita de políticas de controle de versão, segregação de funções e rastreabilidade de requisitos.
+```bash
+git clone [https://github.com/SEU-USUARIO/SEU-REPOSITORIO.git](https://github.com/SEU-USUARIO/SEU-REPOSITORIO.git)
+cd SEU-REPOSITORIO
+python main.py
